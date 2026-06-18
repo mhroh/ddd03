@@ -19,7 +19,7 @@ def now_kst():
 
 def format_elapsed(seconds):
     if seconds is None:
-        return "--:--"
+        return "-"
 
     seconds = max(0, int(round(seconds)))
     minutes, seconds = divmod(seconds, 60)
@@ -29,8 +29,7 @@ def format_elapsed(seconds):
     return f"{minutes:02d}:{seconds:02d}"
 
 def format_message_meta(role, meta):
-    if not meta:
-        return ""
+    meta = meta or {}
 
     timestamp = meta.get("timestamp")
     timestamp_text = timestamp.strftime("%H:%M:%S") if timestamp else "--:--:--"
@@ -208,12 +207,13 @@ def main():
         if idx > 0:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
-                meta_text = format_message_meta(
-                    message["role"],
-                    st.session_state.message_meta.get(idx),
-                )
-                if meta_text:
-                    st.caption(meta_text)
+                if message["role"] == "user":
+                    meta_text = format_message_meta(
+                        message["role"],
+                        st.session_state.message_meta.get(idx),
+                    )
+                    if meta_text:
+                        st.caption(meta_text)
 
     if prompt := st.chat_input("대화 내용을 입력해 주세요.", on_submit=disable_input, args=(True,), disabled=st.session_state.processing):
         if not user_name:
